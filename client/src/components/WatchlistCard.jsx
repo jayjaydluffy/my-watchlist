@@ -31,7 +31,7 @@ const WatchlistCard = () => {
   };
 
   return (
-    <Col>
+    <Col className="mb-4 mb-lg-0">
       <Card
         bg={!darkMode ? "light" : "dark"}
         text={!darkMode ? "dark" : "light"}
