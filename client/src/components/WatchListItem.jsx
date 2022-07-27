@@ -1,13 +1,12 @@
 import { ListGroup } from "react-bootstrap";
 import { useDispatch } from "react-redux";
-
-import * as watchlistActions from "../store/watchlist/actions";
+import { selectShow } from "../store/watchlist/slice";
 
 const WatchListItem = ({ show }) => {
   const dispatch = useDispatch();
 
   const handleSelectShow = (showId) => {
-    dispatch(watchlistActions.selectShow(showId));
+    dispatch(selectShow(showId));
   };
 
   return (

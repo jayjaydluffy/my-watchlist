@@ -1,50 +1,89 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { Button, Card, Col, Stack } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
-import * as watchlistActions from "../store/watchlist/actions";
+import {
+  useDeleteShowMutation,
+  useFetchShowQuery,
+} from "../store/watchlist/api";
 import CardPlaceholder from "./CardPlaceholder";
+import EditShowForm from "./EditShowForm";
 
 const ShowCard = () => {
   const {
-    watchlist: { selectedShow, fetchingShow, show, fetchedShow },
+    watchlist: { selectedShow },
     darkMode,
   } = useSelector(({ watchlist, util }) => ({
     darkMode: util.darkMode,
     watchlist: watchlist,
   }));
 
-  const dispatch = useDispatch();
-  
-  useEffect(() => {
-    if (selectedShow && !fetchingShow && !fetchedShow) {
-      dispatch(watchlistActions.fetchShow(selectedShow));
-    }
-  }, [selectedShow, dispatch, fetchingShow, fetchedShow]);
+  // Fetching show
+  const {
+    isLoading,
+    data: viewShow,
+    isError,
+    error,
+  } = useFetchShowQuery(selectedShow, { skip: !selectedShow });
+
+  // Delete show
+  const [dispatchDeleteShow, { isLoading: isDeleting }] =
+    useDeleteShowMutation();
+  const [editMode, setEditMode] = useState(false);
 
   if (!selectedShow) {
     return;
   }
 
-  let cardContent,
-    viewShow = show[selectedShow];
+  let cardContent;
 
-  if (fetchingShow && !viewShow) {
+  if (isLoading) {
     cardContent = <CardPlaceholder />;
   }
+
+  const handleDeleteShow = async () => {
+    try {
+      await dispatchDeleteShow(selectedShow).unwrap();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   cardContent = (
     <>
       <Card.Header className="d-flex justify-content-between align-items-center">
         <h3 className="mb-0">{viewShow?.title}</h3>
         <Stack direction="horizontal" gap={2}>
-          <Button variant="secondary">Edit</Button>{" "}
-          <Button variant="highlight">Delete</Button>
+          {!editMode && (
+            <Button variant="secondary" onClick={() => setEditMode(true)}>
+              Edit
+            </Button>
+          )}
+          <Button
+            variant="highlight"
+            onClick={handleDeleteShow}
+            disabled={isDeleting}
+          >
+            {isDeleting ? "Deleting..." : "Delete"}
+          </Button>
         </Stack>
       </Card.Header>
-      <Card.Body>
-        <Card.Text>{viewShow?.description || "No description"}</Card.Text>
-      </Card.Body>
+      {isError && (
+        <Card.Body>
+          <Card.Text>{error?.message}</Card.Text>
+        </Card.Body>
+      )}
+      {editMode ? (
+        <EditShowForm
+          show={viewShow}
+          showId={viewShow?._id}
+          cancelEditHandler={() => setEditMode(false)}
+        />
+      ) : (
+        <Card.Body>
+          <Card.Text>{viewShow?.description || "No description"}</Card.Text>
+        </Card.Body>
+      )}
     </>
   );
 

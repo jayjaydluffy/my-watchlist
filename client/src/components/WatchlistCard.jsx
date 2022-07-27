@@ -1,33 +1,23 @@
-import { useCallback, useEffect } from "react";
 import { Button, Card, Col, ListGroup } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
+import { useFetchWatchlistQuery } from "../store/watchlist/api";
+import { addNewShow } from "../store/watchlist/slice";
+import CardPlaceholder from "./CardPlaceholder";
 
-import * as watchlistActions from "../store/watchlist/actions";
 import WatchListItem from "./WatchListItem";
 
 const WatchlistCard = () => {
+  const darkMode = useSelector(({ util }) => util.darkMode);
   const {
-    watchlist: { fetching, fetched, fetchingError, watchlist },
-    darkMode,
-  } = useSelector(({ watchlist, util }) => ({
-    darkMode: util.darkMode,
-    watchlist: watchlist,
-  }));
-
+    data: watchlist,
+    isLoading,
+    isError,
+    error,
+  } = useFetchWatchlistQuery();
   const dispatch = useDispatch();
 
-  const fetchWatchlist = useCallback(async () => {
-    if (!fetching && !fetched && !fetchingError) {
-      await dispatch(watchlistActions.fetchWatchlist());
-    }
-  }, [dispatch, fetching, fetched, fetchingError]);
-
-  useEffect(() => {
-    fetchWatchlist();
-  }, [fetchWatchlist]);
-
-  const handleAddNewShow = (showId) => {
-    dispatch(watchlistActions.addNewShow());
+  const handleAddNewShow = () => {
+    dispatch(addNewShow());
   };
 
   return (
@@ -40,21 +30,19 @@ const WatchlistCard = () => {
           <h3 className="mb-0">My Watchlist</h3>
           <Button onClick={handleAddNewShow}>Add</Button>
         </Card.Header>
-        {fetching && <Card.Body>Fetching...</Card.Body>}
-        {fetched && (
-          <>
-            {!watchlist.length ? (
-              <Card.Body>Your watchlist is empty</Card.Body>
-            ) : (
-              <ListGroup variant="flush">
-                {watchlist.map((show) => (
-                  <WatchListItem key={show._id} show={show} />
-                ))}
-              </ListGroup>
-            )}
-          </>
+        {isLoading ? (
+          <CardPlaceholder />
+        ) : watchlist && watchlist.length ? (
+          <ListGroup variant="flush">
+            {watchlist.map((show) => (
+              <WatchListItem key={show._id} show={show} />
+            ))}
+          </ListGroup>
+        ) : (
+          <Card.Body>
+            {isError ? error?.message : "Watchlist is empty"}
+          </Card.Body>
         )}
-        {fetchingError && "We have error"}
       </Card>
     </Col>
   );

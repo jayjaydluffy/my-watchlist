@@ -9,10 +9,10 @@ function App() {
   return (
     <div className="App">
       <Nav />
-      <Container>
+      <Container className="py-4">
         <Row>
           <WatchlistCard />
-          <ShowCard />
+          <ShowCard/>
           <AddNewShow/>
         </Row>
       </Container>

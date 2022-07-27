@@ -1,21 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Card, Col, Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 
-import * as watchlistActions from "../store/watchlist/actions";
+import { useAddShowMutation } from "../store/watchlist/api";
+import { cancelAddShow } from "../store/watchlist/slice";
 
 const AddNewShow = () => {
-  const { darkMode, isAdding, addNewShow } = useSelector(
-    ({ util, watchlist }) => ({
-      darkMode: util.darkMode,
-      isAdding: watchlist.addingShow,
-      addNewShow: watchlist.isAddNew,
-    })
-  );
+  const { darkMode, addNewShow } = useSelector(({ util, watchlist }) => ({
+    darkMode: util.darkMode,
+    addNewShow: watchlist.isAddNew,
+  }));
+  const [dispatchAddShow, { isLoading: isAdding }] = useAddShowMutation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
   const dispatch = useDispatch();
+
+  const handleClearForm = () => {
+    setTitle("");
+    setDescription("");
+  };
+
+  useEffect(() => {
+    return () => {
+      handleClearForm();
+    };
+  }, []);
 
   if (!addNewShow) {
     return null;
@@ -32,12 +42,13 @@ const AddNewShow = () => {
   };
 
   const handleCancelAdd = () => {
-    dispatch(watchlistActions.cancelAddshow());
+    dispatch(cancelAddShow());
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await dispatch(watchlistActions.addShow({ title, description }));
+    await dispatchAddShow({ title, description });
+    handleClearForm();
   };
 
   return (

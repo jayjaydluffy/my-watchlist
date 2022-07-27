@@ -1,16 +1,14 @@
 import { useEffect } from "react";
 import { Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-// import { toggleDarkMode } from "../store/util/slice";
-import * as utilActions from "../store/util/actions"
+import { toggleDarkMode } from "../store/util/slice";
 
 const DarkModeToggle = () => {
   const darkMode = useSelector(({ util }) => util?.darkMode);
   const dispatch = useDispatch();
 
   const handleOnToggle = () => {
-    // dispatch(toggleDarkMode())
-    dispatch(utilActions.toggleDarkMode())
+    dispatch(toggleDarkMode())
   };
 
   useEffect(() => {
