@@ -73,8 +73,9 @@ router.put("/:id", async (req, res) => {
       { $set: updatedShow },
       { upsert: true }
     );
-    const message = `Show with ID: ${showId} updated.`;
-    res.send(message);
+    res.status(200).json({
+      message: `Show with ID: ${showId} updated.`
+    });
   } catch (error) {
     res.status(400).send("Error updating show.");
   }
@@ -87,10 +88,10 @@ router.delete("/:id", async (req, res) => {
   const watchlistCollection = db.collection("watchlist");
 
   try {
-    const result = await watchlistCollection.deleteOne({ _id: ObjectId(showId) });
-    console.log(result)
-    const message = `Show with ID: ${showId} deleted.`;
-    res.send(message);
+    await watchlistCollection.deleteOne({ _id: ObjectId(showId) });
+    res.status(200).json({
+      message: `Show with ID: ${showId} deleted.`
+    });
   } catch (error) {
     res.status(400).send("Error deleting show.");
   }

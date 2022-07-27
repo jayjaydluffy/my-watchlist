@@ -42,11 +42,17 @@ const WatchlistCard = () => {
         </Card.Header>
         {fetching && <Card.Body>Fetching...</Card.Body>}
         {fetched && (
-          <ListGroup variant="flush">
-            {watchlist.map((show) => (
-              <WatchListItem key={show._id} show={show} />
-            ))}
-          </ListGroup>
+          <>
+            {!watchlist.length ? (
+              <Card.Body>Your watchlist is empty</Card.Body>
+            ) : (
+              <ListGroup variant="flush">
+                {watchlist.map((show) => (
+                  <WatchListItem key={show._id} show={show} />
+                ))}
+              </ListGroup>
+            )}
+          </>
         )}
         {fetchingError && "We have error"}
       </Card>
