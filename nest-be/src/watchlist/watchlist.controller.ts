@@ -14,37 +14,50 @@ export class WatchlistController {
   constructor(private watchlistService: WatchlistService) {}
 
   @Post()
-  addShow(
+  async addShow(
     @Body('title') showTitle: string,
     @Body('description') showDesc: string,
   ) {
-    const newShowId = this.watchlistService.insertShow(showTitle, showDesc);
+    const newShowId = await this.watchlistService.insertShow(
+      showTitle,
+      showDesc,
+    );
     return { id: newShowId };
   }
 
   @Get()
-  getWatchlist() {
-    return this.watchlistService.fetchWatchlist();
+  async getWatchlist() {
+    return await this.watchlistService.fetchWatchlist();
   }
 
   @Get(':id')
-  getShow(@Param('id') showId: string) {
-    return this.watchlistService.fetchShow(showId);
+  async getShow(@Param('id') showId: string) {
+    return await this.watchlistService.fetchShow(showId);
   }
 
   @Put(':id')
-  updateShow(
+  async updateShow(
     @Param('id') showId: string,
     @Body('title') showTitle: string,
     @Body('description') showDesc: string,
   ) {
-    this.watchlistService.editShow(showId, showTitle, showDesc);
-    return null;
+    const updateResult = await this.watchlistService.editShow(
+      showId,
+      showTitle,
+      showDesc,
+    );
+    return {
+      message: updateResult
+        ? `Show with ID: ${showId} updated.`
+        : `Update failed`,
+    };
   }
 
   @Delete(':id')
-  removeShow(@Param('id') showId: string) {
-    this.watchlistService.deleteShow(showId);
-    return null;
+  async removeShow(@Param('id') showId: string) {
+    await this.watchlistService.deleteShow(showId);
+    return {
+      message: `Show with ID: ${showId} deleted.`,
+    };
   }
 }

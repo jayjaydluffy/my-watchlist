@@ -1,52 +1,63 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import * as crypto from 'crypto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { Show } from './watchlist.model';
 
 @Injectable()
 export class WatchlistService {
-  private watchlist: Show[] = [];
+  constructor(@InjectModel('Show') private readonly showModel: Model<Show>) {}
 
-  insertShow(title: string, description: string) {
-    const showId = crypto.randomUUID().toString();
-    const newShow = new Show(showId, title, description);
-    this.watchlist.push(newShow);
-    return showId;
+  async insertShow(title: string, description: string) {
+    const newShow = new this.showModel({ title, description });
+    const result = await newShow.save();
+    return result.id as string;
   }
 
-  fetchWatchlist() {
-    return [...this.watchlist];
+  async fetchWatchlist() {
+    const watchlist = await this.showModel.find().exec();
+    return watchlist;
   }
 
-  fetchShow(showId: string) {
-    const show = this.watchlist.find((show) => show.id === showId);
-    if (!show) {
+  async fetchShow(showId: string) {
+    try {
+      const show = await this.showModel.findById(showId).exec();
+      if (!show) {
+        throw Error();
+      }
+      return show;
+    } catch (error) {
       throw new NotFoundException('Could not find show.');
     }
-    return { ...show };
   }
 
-  editShow(showId: string, showTitle: string, showDesc: string) {
-    const showIdx = this.watchlist.findIndex((show) => show.id === showId);
-    if (showIdx === -1) {
+  async editShow(showId: string, showTitle: string, showDesc: string) {
+    try {
+      const editedShow = await this.showModel.findById(showId).exec();
+      if (!editedShow) {
+        throw Error();
+      }
+      if (showTitle) {
+        editedShow.title = showTitle;
+      }
+      if (showDesc) {
+        editedShow.description = showDesc;
+      }
+
+      const updatedShow = await editedShow.save();
+      return editedShow === updatedShow;
+    } catch (error) {
       throw new NotFoundException('Could not find show.');
     }
-
-    const updatedShow = { ...this.watchlist[showIdx] };
-    if (showTitle) {
-      updatedShow.title = showTitle;
-    }
-    if (showDesc) {
-      updatedShow.description = showDesc;
-    }
-
-    this.watchlist[showIdx] = updatedShow;
   }
 
-  deleteShow(showId: string) {
-    const showIdx = this.watchlist.findIndex((show) => show.id === showId);
-    if (showIdx === -1) {
+  async deleteShow(showId: string) {
+    try {
+      const result = await this.showModel.findByIdAndDelete(showId).exec();
+      if (!result) {
+        throw Error();
+      }
+    } catch (error) {
       throw new NotFoundException('Could not find show.');
     }
-    this.watchlist.splice(showIdx, 1);
   }
 }

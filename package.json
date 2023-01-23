@@ -10,8 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@nestjs/mongoose": "^9.2.1",
     "express": "^4.18.1",
     "mongodb": "^4.7.0",
+    "mongoose": "^6.8.4",
     "nodemon": "^2.0.19"
   }
 }
