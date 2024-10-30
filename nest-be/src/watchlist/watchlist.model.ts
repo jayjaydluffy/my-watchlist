@@ -1,5 +1,4 @@
 import * as mongoose from 'mongoose';
-
 export const ShowSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
